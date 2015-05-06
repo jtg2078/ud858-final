@@ -639,8 +639,6 @@ class ConferenceApi(remote.Service):
         # convert enum type to string
         for key in ['typeOfSession']:
             if data.has_key(key):
-                print 'data has typeOfSession'
-                print 'str value for typeOfSession is {}'.format(str(data[key]))
                 val = data[key]
                 data[key] = str(val)
             else:
@@ -792,11 +790,15 @@ class ConferenceApi(remote.Service):
             also add a new Memcache entry that features the speaker and session names.
             You can choose the Memcache key.
         """
+        print '_cacheFeatureSessions triggered for {0}'.format(session.name)
         sessions = Session.query(Session.speaker == session.speaker).fetch()
-        if len(sessions) > 1:
+        count = len(sessions)
+        print 'number of session created by speaker {0} is {1}'.format(session.speaker, count)
+        if count > 1:
             features = FEATURE_SESSIONS_TPL.format(session.speaker,
                                                    ','.join([s.name for s in sessions]))
             memcache.set(MEMCACHE_FEATURE_SESSIONS_KEY, features)
+
 
     @endpoints.method(message_types.VoidMessage, StringMessage,
                       path='session/announcement/get',
