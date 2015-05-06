@@ -24,6 +24,14 @@ final project for udacity ud858 course
 1. (Optional) Generate your client library(ies) with [the endpoints tool][6].
 1. Deploy your application.
 
+## Task 1: Add Sessions to a Conference
+####Explain your design choices
+For session implementation I largely follow the instruction by defining a Session ndb.Model and a SessionForm message object. I also wrote several helper functions similar to help retrieving and creating session and speaker records
+
+For speaker implementation I decided to use speaker name as a string to represent a speaker, so no speaker model is created. This approach has several severe flaws such as name collision and you can't store additional info about the speaker. The biggest advantage is that it is dead simple to implement, and this is why i am taking this approach. Should this approach really become a problem, we can always change it in V2.
+
+
+
 
 [1]: https://developers.google.com/appengine
 [2]: http://python.org
