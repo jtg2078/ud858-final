@@ -55,6 +55,8 @@ API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 MEMCACHE_ANNOUNCEMENTS_KEY = "RECENT_ANNOUNCEMENTS"
 ANNOUNCEMENT_TPL = ('Last chance to attend! The following conferences '
                     'are nearly sold out: %s')
+MEMCACHE_FEATURE_SESSIONS_KEY = "RECENT_FEATURE_SESSIONS"
+FEATURE_SESSIONS_TPL = "Checkout {}'s sessions: {}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 DEFAULTS = {
@@ -668,9 +670,8 @@ class ConferenceApi(remote.Service):
         session = Session(**data)
         session.put()
 
-        # taskqueue.add(params={'email': user.email(),
-        #                       'sessionInfo': repr(request)},
-        #               url='/tasks/send_confirmation_email')
+        # update feature sessions
+        self._cacheFeatureSessions(session)
 
         return session
 
@@ -783,6 +784,27 @@ class ConferenceApi(remote.Service):
         return SessionForms(
             items=[self._copySessionToForm(session) for session in sessions]
         )
+
+    def _cacheFeatureSessions(self, session):
+        """
+            When a new session is added to a conference, check the speaker.
+            If there is more than one session by this speaker at this conference,
+            also add a new Memcache entry that features the speaker and session names.
+            You can choose the Memcache key.
+        """
+        sessions = Session.query(Session.speaker == session.speaker).fetch()
+        if len(sessions) > 1:
+            features = FEATURE_SESSIONS_TPL.format(session.speaker,
+                                                   ','.join([s.name for s in sessions]))
+            memcache.set(MEMCACHE_FEATURE_SESSIONS_KEY, features)
+
+    @endpoints.method(message_types.VoidMessage, StringMessage,
+                      path='session/announcement/get',
+                      http_method='GET', name='getFeaturedSpeaker')
+    def getFeaturedSpeaker(self, request):
+        """Return Announcement from memcache."""
+        return StringMessage(data=memcache.get(MEMCACHE_FEATURE_SESSIONS_KEY) or "")
+
 
 
 api = endpoints.api_server([ConferenceApi])  # register API

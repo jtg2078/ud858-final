@@ -114,6 +114,11 @@ indexes:
 
 - kind: Conference
   properties:
+  - name: seatsAvailable
+  - name: name
+
+- kind: Conference
+  properties:
   - name: topics
   - name: city
   - name: name
@@ -122,3 +127,8 @@ indexes:
   properties:
   - name: topics
   - name: name
+
+- kind: Session
+  properties:
+  - name: typeOfSession
+  - name: startTime
