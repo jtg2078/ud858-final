@@ -108,3 +108,53 @@ class ConferenceQueryForms(messages.Message):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     filters = messages.MessageField(ConferenceQueryForm, 1, repeated=True)
 
+class Session(ndb.Model):
+    """Session - conference session object"""
+    name = ndb.StringProperty(required=True)
+    highlights = ndb.StringProperty(repeated=True)
+    speaker = ndb.StringProperty()
+    duration = ndb.IntegerProperty()
+    typeOfSession = ndb.StringProperty()
+    date = ndb.DateProperty()
+    startTime = ndb.TimeProperty()
+
+class SessionForm(messages.Message):
+    """SessionForm -- Session outbound form message"""
+    name = messages.StringField(1)
+    highlights = messages.StringField(2, repeated=True)
+    speaker = messages.StringField(3)
+    duration = messages.IntegerField(4)
+    typeOfSession = messages.EnumField('SessionType', 5)
+    date = messages.StringField(6) #DateTimeField()
+    startTime = messages.StringField(7) # (in 24hr notation)
+    websafeKey = messages.StringField(8)
+
+class SessionType(messages.Enum):
+    """SessionType -- session type enumeration value"""
+    NOT_SPECIFIED = 1
+    WORKSHOP = 2
+    LECTURE = 3
+    KEYNOTE = 4
+
+class SessionForms(messages.Message):
+    """SessionForms -- multiple Session outbound form message"""
+    items = messages.MessageField(SessionForm, 1, repeated=True)
+
+class WishlistSession(ndb.Model):
+    """WishlistSession - conference session pointer that user added to wishlist"""
+    sessionConferenceKey = ndb.StringProperty(required=True)
+    sessionKey = ndb.StringProperty(required=True)
+    userId = ndb.StringProperty()
+    addDate = ndb.DateTimeProperty(auto_now_add=True)
+
+class WishlistSessionForm(messages.Message):
+    """WishlistSessionForm -- WishlistSession outbound form message"""
+    sessionConferenceKey = messages.StringField(1)
+    sessionKey = messages.StringField(2)
+    userId = messages.StringField(3)
+    addDate = messages.StringField(4)
+    websafeKey = messages.StringField(5)
+
+class WishlistSessionForms(messages.Message):
+    """WishlistSessionForms -- multiple WishlistSession outbound form message"""
+    items = messages.MessageField(WishlistSessionForm, 1, repeated=True)
